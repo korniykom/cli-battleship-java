@@ -36,6 +36,20 @@ public class Main {
             String input = scanner.nextLine();
             String[] coordinates = input.split(" ");
 
+            if(getShipLength(coordinates) != ships.get(shipsNames[shipPlaced])) {
+                System.out.print("Error!");
+                continue;
+            }
+
+            if(!checkInput(coordinates)) {
+                continue;
+            }
+
+            if(isShipTooClose(coordinates[0], coordinates[1], field)) {
+                System.out.print("Error!");
+                continue;
+            }
+
             placeShip(coordinates[0], coordinates[1], field);
             printField(field);
             shipPlaced++;
@@ -46,16 +60,96 @@ public class Main {
         }
     }
 
+    public static int getShipLength(String[] coordinates) {
+
+        String firstCoordinate = coordinates[0];
+        String secondCoordinate = coordinates[1];
+
+        char firstCoordinateLetter = firstCoordinate.charAt(0);
+        char secondCoordinateLetter = secondCoordinate.charAt(0);
+
+        int firstCoordinateNumber = Integer.parseInt(firstCoordinate.substring(1));
+        int secondCoordinateNumber = Integer.parseInt(secondCoordinate.substring(1));
+
+        if(firstCoordinateNumber == secondCoordinateNumber) {
+//            System.out.print(Math.abs(firstCoordinateLetter - secondCoordinateLetter) + 1);
+            return Math.abs(firstCoordinateLetter - secondCoordinateLetter) + 1;
+        } else if(firstCoordinateLetter == secondCoordinateLetter) {
+//            System.out.print(Math.abs(firstCoordinateNumber - secondCoordinateNumber) + 1);
+            return Math.abs(firstCoordinateNumber - secondCoordinateNumber) + 1;
+        } else {
+            return 0;
+        }
+
+
+
+    }
+
+    public static boolean checkInput(String[] coordinates) {
+        if (coordinates.length != 2) {
+            System.out.println("Error!");
+            return false;
+        }
+
+        String firstCoordinate = coordinates[0];
+        String secondCoordinate = coordinates[1];
+
+        if (firstCoordinate.length() > 3 || firstCoordinate.length() < 2 || secondCoordinate.length() > 3 || secondCoordinate.length() < 2) {
+            System.out.println("Error!");
+            return false;
+        }
+
+        char firstCoordinateLetter = firstCoordinate.charAt(0);
+        char secondCoordinateLetter = secondCoordinate.charAt(0);
+
+        if (!Character.isLetter(firstCoordinateLetter) || !Character.isLetter(secondCoordinateLetter)) {
+            System.out.println("Error!");
+            return false;
+        }
+
+        if (firstCoordinateLetter > 'J' || secondCoordinateLetter > 'J') {
+            System.out.println("Error!");
+            return false;
+        }
+
+        int firstCoordinateNumber = Integer.parseInt(firstCoordinate.substring(1));
+        int secondCoordinateNumber = Integer.parseInt(secondCoordinate.substring(1));
+
+        if (firstCoordinateNumber > 10 || secondCoordinateNumber > 10 || firstCoordinateNumber < 1 || secondCoordinateNumber < 1) {
+            System.out.println("Error!");
+            return false;
+        }
+
+        return true;
+    }
+
     public static void placeShip(String firstCoordinate, String secondCoordinate,char[][] field) {
 
-            if (firstCoordinate.charAt(0) == secondCoordinate.charAt(0)) {
+        char firstCoordinateLetter = firstCoordinate.charAt(0);
+        char secondCoordinateLetter = secondCoordinate.charAt(0);
+
+        int firstCoordinateNumber = Integer.parseInt(firstCoordinate.substring(1));
+        int secondCoordinateNumber = Integer.parseInt(secondCoordinate.substring(1));
+
+
+        if (secondCoordinateLetter < firstCoordinateLetter || secondCoordinateNumber < firstCoordinateNumber) {
+            char tempLetter = firstCoordinateLetter;
+            firstCoordinateLetter = secondCoordinateLetter;
+            secondCoordinateLetter = tempLetter;
+
+            int tempNumber = firstCoordinateNumber;
+            firstCoordinateNumber = secondCoordinateNumber;
+            secondCoordinateNumber = tempNumber;
+        }
+
+            if (firstCoordinateLetter == secondCoordinateLetter) {
                 int row = firstCoordinate.charAt(0) - 'A';
-                for (int col = Integer.parseInt(firstCoordinate.substring(1)) - 1; col <= Integer.parseInt(secondCoordinate.substring(1)) - 1; col++) {
+                for (int col = firstCoordinateNumber - 1; col <= secondCoordinateNumber - 1; col++) {
                     field[row][col] = 'O';
                 }
-            } else if (Integer.parseInt(firstCoordinate.substring(1)) == Integer.parseInt(secondCoordinate.substring(1))) {
-                int col = Integer.parseInt(firstCoordinate.substring(1)) - 1;
-                for (int row = firstCoordinate.charAt(0) - 'A'; row <= secondCoordinate.charAt(0) - 'A'; row++) {
+            } else if (firstCoordinateNumber == secondCoordinateNumber) {
+                int col = firstCoordinateNumber - 1;
+                for (int row = firstCoordinateLetter - 'A'; row <= secondCoordinateLetter - 'A'; row++) {
                     field[row][col] = 'O';
                 }
             } else {
@@ -63,6 +157,40 @@ public class Main {
             }
 
 
+    }
+
+    public static boolean isShipTooClose(String firstCoordinate, String secondCoordinate, char[][] field) {
+
+        char firstCoordinateLetter = firstCoordinate.charAt(0);
+        char secondCoordinateLetter = secondCoordinate.charAt(0);
+
+        int firstCoordinateNumber = Integer.parseInt(firstCoordinate.substring(1));
+        int secondCoordinateNumber = Integer.parseInt(secondCoordinate.substring(1));
+
+        if (secondCoordinateLetter < firstCoordinateLetter || secondCoordinateNumber < firstCoordinateNumber) {
+            char tempLetter = firstCoordinateLetter;
+            firstCoordinateLetter = secondCoordinateLetter;
+            secondCoordinateLetter = tempLetter;
+
+            int tempNumber = firstCoordinateNumber;
+            firstCoordinateNumber = secondCoordinateNumber;
+            secondCoordinateNumber = tempNumber;
+        }
+
+        int startRow = Math.max(0, firstCoordinateLetter - 'A' - 1);
+        int endRow = Math.min(9, secondCoordinateLetter - 'A' + 1);
+        int startCol = Math.max(0, firstCoordinateNumber - 1 - 1);
+        int endCol = Math.min(9, secondCoordinateNumber - 1 + 1);
+
+        for (int row = startRow; row <= endRow; row++) {
+            for (int col = startCol; col <= endCol; col++) {
+                if (field[row][col] == 'O') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public static void fillField(char[][] field) {
